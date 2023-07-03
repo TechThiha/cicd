@@ -1,0 +1,31 @@
+pipeline:
+  name: CI_Test Stage
+  identifier: CI_Test_Stage
+  projectIdentifier: Henry_CI
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Show
+        identifier: Show
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry_1
+                  identifier: BuildAndPushDockerRegistry_1
+                  spec:
+                    connectorRef: Registry
+                    repo: nginx
+                    tags:
+                      - nginx
