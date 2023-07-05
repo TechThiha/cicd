@@ -6,15 +6,15 @@ pipeline:
   tags: {}
   stages:
     - stage:
-        name: Show
-        identifier: Show
+        name: build
+        identifier: build
         description: ""
         type: CI
         spec:
           cloneCodebase: false
           platform:
             os: Linux
-            arch: Amd64
+            arch: Arm64
           runtime:
             type: Cloud
             spec: {}
@@ -26,6 +26,6 @@ pipeline:
                   identifier: BuildAndPushDockerRegistry_1
                   spec:
                     connectorRef: Registry
-                    repo: nginx
+                    repo: centos
                     tags:
-                      - nginx
+                      - centos
