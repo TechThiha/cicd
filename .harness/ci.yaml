@@ -47,7 +47,7 @@ pipeline:
                   identifier: BuildAndPushDockerRegistry_1
                   spec:
                     connectorRef: docker_regi
-                    repo: techrepos/ci_tutorial
+                    repo: techrepos/nginx
                     tags:
                       - latest
     - stage:
