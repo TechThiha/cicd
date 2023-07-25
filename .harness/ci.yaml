@@ -1,0 +1,55 @@
+pipeline:
+  name: ci
+  identifier: ci
+  projectIdentifier: CI_Test
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: Git
+        repoName: cicd
+        build: <+input>
+  stages:
+    - stage:
+        name: build
+        identifier: build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Run_1
+                  identifier: Run_1
+                  spec:
+                    connectorRef: docker_regi
+                    image: golang:1.15
+                    shell: Sh
+                    command: |-
+                      go get gotest.tools/gotestsum
+                      gotestsum --format=standard-verbose --junitfile unit-tests.xml || true
+                      CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
+                    privileged: true
+                    reports:
+                      type: JUnit
+                      spec:
+                        paths:
+                          - "*.xml"
+              - step:
+                  type: BuildAndPushDockerRegistry
+                  name: BuildAndPushDockerRegistry_1
+                  identifier: BuildAndPushDockerRegistry_1
+                  spec:
+                    connectorRef: docker_regi
+                    repo: techrepos/ci_tutorial
+                    tags:
+                      - <+pipeline.sequenceId>
