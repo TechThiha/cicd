@@ -35,11 +35,10 @@ pipeline:
                     image: golang:1.15
                     shell: Sh
                     command: |-
-                      go install gotest.tools/gotestsum
-                      go run gotest.tools/gotestsum
+                      go get gotest.tools/gotestsum
                       gotestsum --format=standard-verbose --junitfile unit-tests.xml || true
                       CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-                    privileged: true
+                    privileged: false
                     reports:
                       type: JUnit
                       spec:
