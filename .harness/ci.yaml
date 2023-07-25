@@ -49,7 +49,7 @@ pipeline:
                     connectorRef: docker_regi
                     repo: techrepos/ci_tutorial
                     tags:
-                      - <+pipeline.sequenceId>
+                      - latest
     - stage:
         name: test2
         identifier: test2
