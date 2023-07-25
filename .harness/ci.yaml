@@ -35,7 +35,7 @@ pipeline:
                     image: golang:latest
                     shell: Sh
                     command: |-
-                      go get gotest.tools/gotestsum
+                      go install golang.org/dl/go1.19.4@latest
                       gotestsum --format=standard-verbose --junitfile unit-tests.xml || true
                       CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
                     privileged: true
