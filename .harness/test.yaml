@@ -17,14 +17,6 @@ pipeline:
         type: CI
         spec:
           cloneCodebase: true
-          infrastructure:
-            type: KubernetesDirect
-            spec:
-              connectorRef: k8stutorial
-              namespace: harness-delegate-ng
-              automountServiceAccountToken: true
-              nodeSelector: {}
-              os: Linux
           execution:
             steps:
               - step:
@@ -32,7 +24,7 @@ pipeline:
                   name: Run Unit Tests
                   identifier: Run_Unit_Tests
                   spec:
-                    connectorRef: dockerhubconnector
+                    connectorRef: docker_regi
                     image: golang:1.15
                     shell: Sh
                     command: |2-
@@ -49,10 +41,16 @@ pipeline:
                   name: BuildAndPushDockerRegistry_1
                   identifier: BuildAndPushDockerRegistry_1
                   spec:
-                    connectorRef: dockerhubconnector
-                    repo: mydockerhub/ci-tutorial-repo
+                    connectorRef: docker_regi
+                    repo: techrepos/ci_tutorial
                     tags:
                       - <+pipeline.sequenceId>
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
     - stage:
         name: n test
         identifier: n_test
@@ -60,8 +58,6 @@ pipeline:
         type: CI
         spec:
           cloneCodebase: false
-          infrastructure:
-            useFromStage: Build_Test_and_Push
           execution:
             steps:
               - step:
@@ -69,18 +65,24 @@ pipeline:
                   name: Pull and host image
                   identifier: Pull_and_host_image
                   spec:
-                    connectorRef: dockerhubconnector
-                    image: mydockerhub/ci-tutorial-repo:<+pipeline.sequenceId>
+                    connectorRef: docker_regi
+                    image: techrepos/ci_tutorial:<+pipeline.sequenceId>
                     shell: Sh
               - step:
                   type: Run
                   name: Test server connection
                   identifier: Test_server_connection
                   spec:
-                    connectorRef: dockerhubconnector
+                    connectorRef: docker_regi
                     image: curlimages/curl:7.73.0
                     shell: Sh
                     command: |-
                       sleep 10
                       curl localhost:8080
                       curl localhost:8080?Hello!_I_am_a_nice_demo!
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
