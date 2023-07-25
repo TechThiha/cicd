@@ -1,5 +1,5 @@
 pipeline:
-  name: test
+  name: CI_Test
   identifier: test
   projectIdentifier: CI_Test
   orgIdentifier: default
@@ -7,38 +7,38 @@ pipeline:
   properties:
     ci:
       codebase:
-        connectorRef: Git
-        repoName: cicd
+        connectorRef: ghconnector
         build: <+input>
   stages:
     - stage:
-        name: build
-        identifier: build
+        name: Build Test and Push
+        identifier: Build_Test_and_Push
         description: ""
         type: CI
         spec:
           cloneCodebase: true
-          platform:
-            os: Linux
-            arch: Amd64
-          runtime:
-            type: Cloud
-            spec: {}
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: k8stutorial
+              namespace: harness-delegate-ng
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
           execution:
             steps:
               - step:
                   type: Run
-                  name: Run_1
-                  identifier: Run_1
+                  name: Run Unit Tests
+                  identifier: Run_Unit_Tests
                   spec:
-                    connectorRef: account.harnessImage
+                    connectorRef: dockerhubconnector
                     image: golang:1.15
                     shell: Sh
-                    command: |-
-                      go get gotest.tools/gotestsum
-                      gotestsum --format=standard-verbose --junitfile unit-tests.xml || true
-                      CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
-                    privileged: true
+                    command: |2-
+                         go get gotest.tools/gotestsum
+                         gotestsum --format=standard-verbose --junitfile unit-tests.xml || true
+                         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
                     reports:
                       type: JUnit
                       spec:
@@ -49,7 +49,38 @@ pipeline:
                   name: BuildAndPushDockerRegistry_1
                   identifier: BuildAndPushDockerRegistry_1
                   spec:
-                    connectorRef: docker_regi
-                    repo: techrepos/ci_tutorial
+                    connectorRef: dockerhubconnector
+                    repo: mydockerhub/ci-tutorial-repo
                     tags:
-                      - curlimages
+                      - <+pipeline.sequenceId>
+    - stage:
+        name: n test
+        identifier: n_test
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          infrastructure:
+            useFromStage: Build_Test_and_Push
+          execution:
+            steps:
+              - step:
+                  type: Background
+                  name: Pull and host image
+                  identifier: Pull_and_host_image
+                  spec:
+                    connectorRef: dockerhubconnector
+                    image: mydockerhub/ci-tutorial-repo:<+pipeline.sequenceId>
+                    shell: Sh
+              - step:
+                  type: Run
+                  name: Test server connection
+                  identifier: Test_server_connection
+                  spec:
+                    connectorRef: dockerhubconnector
+                    image: curlimages/curl:7.73.0
+                    shell: Sh
+                    command: |-
+                      sleep 10
+                      curl localhost:8080
+                      curl localhost:8080?Hello!_I_am_a_nice_demo!
