@@ -20,7 +20,7 @@ pipeline:
           cloneCodebase: true
           platform:
             os: Linux
-            arch: Amd64
+            arch: Arm64
           runtime:
             type: Cloud
             spec: {}
@@ -34,7 +34,10 @@ pipeline:
                     connectorRef: docker_regi
                     image: golang:1.15
                     shell: Sh
-                    command: echo "Hello"
+                    command: |-
+                      go get -u gotest.tools/gotestsum
+                      gotestsum --format=standard-verbose --junitfile unit-tests.xml || true
+                      CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
                     privileged: false
                     reports:
                       type: JUnit
@@ -47,7 +50,7 @@ pipeline:
                   identifier: BuildAndPushDockerRegistry_1
                   spec:
                     connectorRef: docker_regi
-                    repo: techrepos/nginx
+                    repo: techrepos/ci_tutorial
                     tags:
                       - latest
     - stage:
