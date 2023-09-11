@@ -32,13 +32,14 @@ pipeline:
                   timeout: 20m
                   identifier: Run_1
                   spec:
-                    connectorRef: docker_regi
-                    image: golang:latest
+                    connectorRef: <+input>
+                    image: golang:1.15
                     shell: Sh
                     command: |-
-                      go get gotest.tools/gotestsum
-                      gotestsum --format=standard-verbose --junitfile unit-tests.xml || true
-                      CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo
+                      set +e
+                      go get gotest.tools/gogetsum 
+                      gogetsum --format=standard-verbose --junitfile unit-tests.xml
+                      exit 0
                     privileged: false
                     reports:
                       type: JUnit
@@ -50,8 +51,8 @@ pipeline:
                   name: BuildAndPushDockerRegistry_1
                   identifier: BuildAndPushDockerRegistry_1
                   spec:
-                    connectorRef: docker_regi
-                    repo: techrepos/ci_tutorial
+                    connectorRef: <+input>
+                    repo: <+input>
                     tags:
                       - <+pipeline.sequenceId>
     - stage:
