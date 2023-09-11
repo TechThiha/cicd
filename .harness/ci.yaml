@@ -29,6 +29,7 @@ pipeline:
               - step:
                   type: Run
                   name: Run_1
+                  timeout: 20m
                   identifier: Run_1
                   spec:
                     connectorRef: docker_regi
